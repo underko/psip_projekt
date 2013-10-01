@@ -195,89 +195,77 @@ public class PacketCapturer {
     						);
     			}
     		};
-            
-    		EventQueue.invokeLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
 					
-		            PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
+            PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 
-		            	int n_arp, n_tcp, n_udp, n_icmp;
-						int n_raw, n_snap, n_llc, n_ipx, n_sap;
-						int unkw;
-						int actual;
-						int port;
+            	int n_arp, n_tcp, n_udp, n_icmp;
+				int n_raw, n_snap, n_llc, n_ipx, n_sap;
+				int unkw;
+				int actual;
+				int port;
 		            	
-		    			public void nextPacket(PcapPacket packet, String user) {
+    			public void nextPacket(PcapPacket packet, String user) {
 
-		    				JBuffer buffer = packet;
-		    				Ip4 ip = new Ip4();
+    				JBuffer buffer = packet;
+    				Ip4 ip = new Ip4();
+    				
+    				byte headb[] = buffer.getByteArray(0, buffer.size());
+    				String head = bytesToHexString(headb);
+    				
+    				actual = buffer.getUShort(12);
+    				
+    				if (actual >= 1536) {
+    					//je to ethernet 2 atd...
+    					if (actual == 2054)
+    						n_arp++;
+    					else if (actual == 2048) {
+	    						switch (buffer.getUByte(23)) {
+    							case 1: n_icmp++; break;
+    							case 6: n_tcp++; break;
+    							case 17: n_udp++; break;
+    							default: unkw++; break;
+    						}
+    					}
+    				}
+    				else if (actual > 0 && actual <= 1500) {
+    					//je to ieee atd...
+    					if (buffer.getUByte(14) == 3)
+    						n_llc++;
+    					else {
+    						switch(buffer.getUShort(14)) {
+    							case 43690: n_snap++; break;
+    							case 57568: n_ipx++; break;
+    							case 61680: n_sap++; break;
+    							case 65535: n_raw++; break;
+    							default: unkw++; break;
+    						}
+    					}
+    				}
 		    				
-		    				byte headb[] = buffer.getByteArray(0, buffer.size());
-		    				String head = bytesToHexString(headb);
-		    				
-		    				actual = buffer.getUShort(12);
-		    				
-		    				if (actual >= 1536) {
-		    					//je to ethernet 2 atd...
-		    					if (actual == 2054)
-		    						n_arp++;
-		    					else if (actual == 2048) {
-
-		    						switch (buffer.getUByte(23)) {
-		    							case 1: n_icmp++; break;
-		    							case 6: n_tcp++; break;
-		    							case 17: n_udp++; break;
-		    							default: unkw++; break;
-		    						}
-		    					}
-		    				}
-		    				else if (actual > 0 && actual <= 1500) {
-		    					//je to ieee atd...
-		    					if (buffer.getUByte(14) == 3)
-		    						n_llc++;
-		    					else {
-		    						switch(buffer.getUShort(14)) {
-		    							case 43690: n_snap++; break;
-		    							case 57568: n_ipx++; break;
-		    							case 61680: n_sap++; break;
-		    							case 65535: n_raw++; break;
-		    							default: unkw++; break;
-		    						}
-		    					}
-		    				}
-		    				
-		    				System.out.printf("%s, ethertype: %d, port: %d, caplen: %d, len: %d, dip: %s, sip: %s\narp: %d, tcp: %d, udp: %d, icmp: %d, raw: %d, snap: %d, llc: %d, ipx: %d, sap: %d, unkw: %d, user: %s\n", 
-		    						new Date(packet.getCaptureHeader().timestampInMillis()),
-		    						buffer.getUShort(12),
-		    						port,
-		    						packet.getCaptureHeader().caplen(), 
-		    						packet.getCaptureHeader().wirelen(),
-		    						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).destination()),
-		    						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).source()),
-		    						n_arp,
-		    						n_tcp,
-		    						n_udp, 
-		    						n_icmp,
-		    						n_raw, 
-		    						n_snap, 
-		    						n_llc, 
-		    						n_ipx, 
-		    						n_sap,
-		    						unkw,
-		    						user
-		    						);
-		    			}
-		    		};
+    				System.out.printf("%s, ethertype: %d, port: %d, caplen: %d, len: %d, dip: %s, sip: %s\narp: %d, tcp: %d, udp: %d, icmp: %d, raw: %d, snap: %d, llc: %d, ipx: %d, sap: %d, unkw: %d, user: %s\n", 
+    						new Date(packet.getCaptureHeader().timestampInMillis()),
+    						buffer.getUShort(12),
+    						port,
+    						packet.getCaptureHeader().caplen(), 
+    						packet.getCaptureHeader().wirelen(),
+    						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).destination()),
+    						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).source()),
+    						n_arp,
+    						n_tcp,
+    						n_udp, 
+    						n_icmp,
+    						n_raw, 
+    						n_snap, 
+    						n_llc, 
+    						n_ipx, 
+    						n_sap,
+    						unkw,
+    						user
+    				);
+    			}
+            };
 					
-					pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "pcap");
-				}
-			});
-    		
-    		
-            
+    		pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "pcap");
             pcap2.loop(Pcap.LOOP_INFINITE, jpacketHandler2, "pcap2");
             
             pcap.close();
