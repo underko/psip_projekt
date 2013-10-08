@@ -7,6 +7,7 @@ import java.util.Date;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.Pcap.Direction;
 import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -44,7 +45,9 @@ public class PacketHandler {
         	System.out.println(pcap.getErr());
         	return;
         }
-
+        
+        pcap.setDirection(Direction.IN);
+        
         System.out.println("Zacinam tahat packety ...");
 		
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
@@ -68,8 +71,8 @@ public class PacketHandler {
 						n_arp++;
 					else if (actual == 2048) {
     						switch (buffer.getUByte(23)) {
-							case 1: n_icmp++; break;
-							case 6: n_tcp++; Gui.incCount_tcp(); break; //aj do ui label-u
+							case 1: n_icmp++; Gui.incCount_icmp(); break;
+							case 6: n_tcp++; Gui.incCount_tcp(); break; 
 							case 17: n_udp++; break;
 							default: unkw++; break;
 						}
