@@ -1,5 +1,7 @@
 package test_pakety;
 
+import gui.Gui;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -36,8 +38,8 @@ public class PacketCapturer {
 		
         try {
         	
-        	//Gui app = new Gui();
-        	//app.gui();
+        	Gui app = new Gui();
+        	app.gui();
         	//devArray = new ArrayList<String>();
 
         	// zoznamy so zariadeniami na pc

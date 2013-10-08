@@ -1,6 +1,9 @@
 package test_pakety;
 
+import gui.Gui;
+
 import java.util.Date;
+
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
@@ -66,7 +69,7 @@ public class PacketHandler {
 					else if (actual == 2048) {
     						switch (buffer.getUByte(23)) {
 							case 1: n_icmp++; break;
-							case 6: n_tcp++; break;
+							case 6: n_tcp++; Gui.incCount_tcp(); break; //aj do ui label-u
 							case 17: n_udp++; break;
 							default: unkw++; break;
 						}
