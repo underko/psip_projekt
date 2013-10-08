@@ -11,12 +11,12 @@ import org.jnetpcap.protocol.network.Ip4;
 
 public class PacketHandler {
 	
-	StringBuilder errbuf;
+	StringBuilder errbuf = new StringBuilder();
 	int snaplen = 64 * 1024;           	// cely packet
     int flags = Pcap.MODE_PROMISCUOUS; 	// vsetko co pride na sietovu kartu
     int timeout = 1 * 1000;           	// 10ms
 	
-	public void getPacket (PcapIf device, String filter) {
+	public void getPacket (PcapIf device, String filter, String user) {
 		
         Pcap pcap = Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);
         
@@ -25,7 +25,7 @@ public class PacketHandler {
             return;
         }
         
-        System.out.println(device.getName() + " otvorene.");
+        System.out.println(device.getDescription() + " otvorene.");
 
         //nastavenie filtru
         PcapBpfProgram program = new PcapBpfProgram();
@@ -110,8 +110,11 @@ public class PacketHandler {
 			}
         };
         
-        pcap.loop(1, jpacketHandler, "pcap");
-        pcap.close();
+        while (true) {
+        	pcap.loop(1, jpacketHandler, user);
+        }
+        
+        	//pcap.close();
 	}
 
 }

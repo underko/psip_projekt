@@ -10,7 +10,8 @@ import org.jnetpcap.PcapIf;
 public class PacketCapturer {
  
 	public static ArrayList<String> devArray;
-	public static PcapIf device = new PcapIf();
+	public static PcapIf device_0 = new PcapIf();
+	public static PcapIf device_1 = new PcapIf();
 	
 	public static String byteToHex(byte b) {
 	    int i = b & 0xFF;
@@ -72,31 +73,50 @@ public class PacketCapturer {
                 //Gui.vypis(String.format("#%d: %s [%s]\n", i, device.toString(), description));
             }
             
-            System.out.println("Vyberte zariadenie: ");
+            System.out.println("Vyberte 1. zariadenie: ");
             
             Scanner scan_n = new Scanner(System.in);
             Integer n = scan_n.nextInt();
             
-            device = alldevs_tmp.get(n - 1);
+            device_0 = alldevs_tmp.get(n - 1);
+            
+
+            System.out.println("Vyberte 2. zariadenie: ");
+            
+            scan_n = new Scanner(System.in);
+            n = scan_n.nextInt();
+            
+            device_1 = alldevs_tmp.get(n - 1);
             
         } catch (Exception e) {
             System.out.println(e);
         }
         
-        //while (true) {
         	port_0.start();
+        	port_1.start();
         
         
     }
 	
 	static Thread  port_0 = (new Thread(new Runnable() {
 		
-		PacketHandler ph = new PacketHandler();
+		PacketHandler ph_0 = new PacketHandler();
 		
 		public void run() {
-			while(true) {
-				ph.getPacket(device, null);
-			}
+			
+				ph_0.getPacket(device_0, "ip", "port_0");
+			
+		}
+	}));
+	
+static Thread  port_1 = (new Thread(new Runnable() {
+		
+		PacketHandler ph_1 = new PacketHandler();
+		
+		public void run() {
+			
+				ph_1.getPacket(device_1, "ip", "port_1");
+			
 		}
 	}));
 	
