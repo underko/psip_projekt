@@ -63,13 +63,6 @@ public class Gui extends JFrame {
 		textpane.setEditable(false);
 		win.add(sBar);
 		
-		
-		
-		//cmbDevices = new JComboBox<String>((String[]) PacketCapturer.devArray.toArray());
-		//cmbDevices.setBounds(5, 5, 130, 30);
-		//cmbDevices.setSelectedIndex(0);		
-		//win.add(cmbDevices);
-		
 		obnov();
 	}
 	
