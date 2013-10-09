@@ -18,12 +18,12 @@ public class Gui extends JFrame {
 	static JLabel n_arp, n_tcp, n_udp, n_icmp, n_raw, n_snap, n_llc, n_ipx,	n_sap, n_unkw;
 	static StyledDocument poleDoc;
 	static JComboBox<String> cmbDevices;
-	static int count_tcp, count_icmp;
+	static int count_arp, count_tcp, count_udp, count_icmp, count_raw, count_snap, count_unkw;
 	static String[] stlpce = {" MAC adresa", "Port"};
 	static JTable macTab;
 	static DefaultTableModel tabModel; 
 	
-	static Object[][] tmp_data= {{"mac tmp 01", new Integer(10)}, {"mac tmp 02", new Integer(20)}, {"mac tmp 03", new Integer(30)}, {"mac tmp 04", new Integer(40)}, {"mac tmp 05", new Integer(50)}};
+	static Object[][] macData = {};
 	
 	final static Border obrys= BorderFactory.createLineBorder(Color.black);
 	
@@ -36,44 +36,68 @@ public class Gui extends JFrame {
 		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		win.setLocationRelativeTo(null);
 		
-		l_arp = new JLabel("ARP");
+		//arp
+		count_arp = 0;
+		l_arp = new JLabel("ARP:");
+		l_arp.setBounds(5, 10, 35, 15);
+		win.add(l_arp);
+		
+		n_arp = new JLabel();
+		n_arp.setText(String.valueOf(count_arp));
+		n_arp.setBounds(40, 10, 60, 15);
+		win.add(n_arp);
 
+		//tcp
 		count_tcp = 0;
 		l_tcp = new JLabel("TCP:");
-		l_tcp.setBounds(5, 5, 35, 15);
-		//l_tcp.setBorder(obrys);
+		l_tcp.setBounds(5, 25, 35, 15);
 		win.add(l_tcp);
 		
 		n_tcp = new JLabel();
 		n_tcp.setText(String.valueOf(count_tcp));
-		n_tcp.setBounds(40, 5, 60, 15);
-		//n_tcp.setBorder(obrys);
+		n_tcp.setBounds(40, 25, 60, 15);
 		win.add(n_tcp);
 		
-		l_udp = new JLabel("UDP");
+		//udp
+		count_udp = 0;
+		l_udp = new JLabel("UDP:");
+		l_udp.setBounds(5, 40, 35, 15);
+		win.add(l_udp);
 		
-		l_icmp = new JLabel("ICMP");
-		
+		n_udp = new JLabel();
+		n_udp.setText(String.valueOf(count_udp));
+		n_udp.setBounds(40, 40, 60, 15);
+		win.add(n_udp);
+				
+		//icmp
 		count_icmp = 0;
 		l_icmp = new JLabel("ICMP:");
-		l_icmp.setBounds(5, 25, 35, 15);
-		//l_icmp.setBorder(obrys);
+		l_icmp.setBounds(5, 55, 35, 15);
 		win.add(l_icmp);
 		
 		n_icmp = new JLabel();
 		n_icmp.setText(String.valueOf(count_icmp));
-		n_icmp.setBounds(40, 25, 60, 15);
-		//n_icmp.setBorder(obrys);
+		n_icmp.setBounds(40, 55, 60, 15);
 		win.add(n_icmp);
 		
-		
+		//ostatne
 		l_raw = new JLabel("RAW");
 		l_snap = new JLabel("SNAP");
 		l_llc = new JLabel("LLC");
 		l_ipx = new JLabel("IPX");
 		l_sap = new JLabel("SAP");
-		l_unkw = new JLabel("UNKW");
 		
+		//unkw
+		count_unkw = 0;
+		l_unkw = new JLabel("unkw:");
+		l_unkw.setBounds(5, 70, 35, 15);
+		win.add(l_unkw);
+		
+		n_unkw = new JLabel();
+		n_unkw.setText(String.valueOf(count_unkw));
+		n_unkw.setBounds(40, 70, 60, 15);
+		win.add(n_unkw);
+				
 		textpane = new JTextPane();
 		poleDoc = textpane.getStyledDocument();
 		
@@ -83,8 +107,12 @@ public class Gui extends JFrame {
 		textpane.setEditable(false);
 		win.add(sBar);
 		
+		//mac tab
 		tabModel = new DefaultTableModel();
-		macTab = new JTable(tmp_data, stlpce);
+		tabModel.addColumn("MAC adresa");
+		tabModel.addColumn("port");
+		
+		macTab = new JTable(tabModel);
 		
 		sBar = new JScrollPane(macTab);
 		sBar.setBounds(win.getWidth() / 2, 2 * win.getHeight() / 3 - 10, win.getWidth() / 2 - 15, win.getHeight() / 3 - 40);
@@ -103,16 +131,40 @@ public class Gui extends JFrame {
 		Gui.count_tcp = count_tcp;
 	}
 	
+	public static void incCount_arp() {
+		count_arp += 1;
+		n_arp.setText(String.valueOf(count_arp));
+		obnov();
+	}
+	
 	public static void incCount_tcp() {
 		count_tcp += 1;
 		n_tcp.setText(String.valueOf(count_tcp));
 		obnov();
 	}
 
+	public static void incCount_udp() {
+		count_udp += 1;
+		n_udp.setText(String.valueOf(count_udp));
+		obnov();
+	}
+	
 	public static void incCount_icmp() {
 		count_icmp += 1;
 		n_icmp.setText(String.valueOf(count_icmp));
 		obnov();
+	}
+	
+	public static void incCount_unkw() {
+		count_unkw += 1;
+		n_unkw.setText(String.valueOf(count_unkw));
+		obnov();
+	}
+	
+	public static void pridajRiadok(String mac, int port) {
+		
+		tabModel.addRow(new Object[]{mac, port});
+		tabModel.fireTableDataChanged();
 	}
 	
 	public static void vypis(String s) {
@@ -126,7 +178,12 @@ public class Gui extends JFrame {
 	}
 	
 	public static void obnov() {
-		win.revalidate();
-		win.repaint();
+		try {
+			win.revalidate();
+			win.repaint();
+		}
+		catch (Exception e) {
+			// to je zle :D
+		}
 	}
 }

@@ -46,7 +46,7 @@ public class PacketHandler {
         	return;
         }
         
-        pcap.setDirection(Direction.IN);
+        pcap.setDirection(Direction.OUT);
         
         System.out.println("Zacinam tahat packety ...");
 		
@@ -73,8 +73,8 @@ public class PacketHandler {
     						switch (buffer.getUByte(23)) {
 							case 1: n_icmp++; Gui.incCount_icmp(); break;
 							case 6: n_tcp++; Gui.incCount_tcp(); break; 
-							case 17: n_udp++; break;
-							default: unkw++; break;
+							case 17: n_udp++; Gui.incCount_udp(); break;
+							default: unkw++; Gui.incCount_unkw(); break;
 						}
 					}
 				}
@@ -88,9 +88,27 @@ public class PacketHandler {
 							case 57568: n_ipx++; break;
 							case 61680: n_sap++; break;
 							case 65535: n_raw++; break;
-							default: unkw++; break;
+							default: unkw++; Gui.incCount_unkw(); break;
 						}
 					}
+				}
+				
+				if (packet.hasHeader(ip)) {
+					String src = new String();
+					String dst = new String();
+					int port;
+					
+					src = asString(buffer.getByteArray(6, 6));
+					dst = asString(buffer.getByteArray(0, 6));
+					port = Integer.parseInt(user);
+					
+					//Gui.vypis(String.format("DST: %s SRC: %s port: %d\n", dst, src, port));
+					
+					if (!SwitchMain.obshaujeMac(src, port)) {
+						SwitchMain.pridajZaznam(src, port);
+						Gui.pridajRiadok(src, port);
+					}
+					
 				}
 	    				
 				System.out.printf("%s, ethertype: %d, port: %d, caplen: %d, len: %d, dip: %s, sip: %s\narp: %d, tcp: %d, udp: %d, icmp: %d, raw: %d, snap: %d, llc: %d, ipx: %d, sap: %d, unkw: %d, user: %s\n", 
@@ -113,6 +131,7 @@ public class PacketHandler {
 						unkw,
 						user
 				);
+				
 			}
         };
         
@@ -120,7 +139,26 @@ public class PacketHandler {
         	pcap.loop(1, jpacketHandler, user);
         }
         
-        	//pcap.close();
+        //pcap.close();
+	}
+	
+	private static String asString(final byte[] mac) {  
+		
+		final StringBuilder buf = new StringBuilder();  
+		
+		for (byte b : mac) {  
+			if (buf.length() != 0) {  
+				buf.append(':');  
+			}  
+			
+			if (b >= 0 && b < 16) {  
+				buf.append('0');  
+			}  
+			
+			buf.append(Integer.toHexString((b < 0) ? b + 256 : b).toUpperCase());  
+	    }
+		
+		return buf.toString();  
 	}
 
 }

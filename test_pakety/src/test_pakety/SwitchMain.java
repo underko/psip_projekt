@@ -9,9 +9,9 @@ import java.util.Scanner;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
  
-public class PacketCapturer {
+public class SwitchMain {
  
-	public static ArrayList<String> devArray;
+	public static ArrayList<RiadokTabulka> macTabList = new ArrayList<RiadokTabulka>();
 	public static PcapIf device_0 = new PcapIf();
 	public static PcapIf device_1 = new PcapIf();
 	
@@ -40,14 +40,12 @@ public class PacketCapturer {
         	
         	Gui app = new Gui();
         	app.gui();
-        	//devArray = new ArrayList<String>();
 
         	// zoznamy so zariadeniami na pc
         	List alldevs = new ArrayList();
         	List<PcapIf> alldevs_tmp = new ArrayList<PcapIf>();
         	
             StringBuilder errbuf = new StringBuilder();
-            //String err = "";
 
             //nacitanie sietovych zariadeni
             int r = Pcap.findAllDevs(alldevs, errbuf);
@@ -60,7 +58,6 @@ public class PacketCapturer {
             
             for (Object dev: alldevs) {
             	alldevs_tmp.add((PcapIf)dev);
-            	//devArray.add(dev.toString());
             }
 
             System.out.println(alldevs_tmp.size() + " network devices found:");
@@ -97,7 +94,6 @@ public class PacketCapturer {
         	port_0.start();
         	port_1.start();
         
-        
     }
 	
 	static Thread  port_0 = (new Thread(new Runnable() {
@@ -106,7 +102,7 @@ public class PacketCapturer {
 		
 		public void run() {
 			
-				ph_0.getPacket(device_0, "ip", "port_0");
+				ph_0.getPacket(device_0, "ip", "0");
 			
 		}
 	}));
@@ -117,9 +113,22 @@ static Thread  port_1 = (new Thread(new Runnable() {
 		
 		public void run() {
 			
-				ph_1.getPacket(device_1, "ip", "port_1");
+				ph_1.getPacket(device_1, "ip", "1");
 			
 		}
 	}));
+
+	public static boolean obshaujeMac(String mac, int port) {
+		for (RiadokTabulka riadok: macTabList) {
+			if (riadok != null && riadok.macAdresa.equals(mac) && riadok.port == port)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	public static void pridajZaznam(String mac, int port) {
+		SwitchMain.macTabList.add(new RiadokTabulka(mac, port));
+	}
 	
 }
