@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 
 @SuppressWarnings("serial")
@@ -12,12 +13,17 @@ public class Gui extends JFrame {
 	static JFrame win;
 	static JButton btn_tmpname;
 	static JTextPane textpane;
-	static JScrollPane sBar;	
+	static JScrollPane sBar, macBar;	
 	static JLabel l_arp, l_tcp, l_udp, l_icmp, l_raw, l_snap, l_llc, l_ipx,	l_sap, l_unkw;
 	static JLabel n_arp, n_tcp, n_udp, n_icmp, n_raw, n_snap, n_llc, n_ipx,	n_sap, n_unkw;
 	static StyledDocument poleDoc;
 	static JComboBox<String> cmbDevices;
 	static int count_tcp, count_icmp;
+	static String[] stlpce = {" MAC adresa", "Port"};
+	static JTable macTab;
+	static DefaultTableModel tabModel; 
+	
+	static Object[][] tmp_data= {{"mac tmp 01", new Integer(10)}, {"mac tmp 02", new Integer(20)}, {"mac tmp 03", new Integer(30)}, {"mac tmp 04", new Integer(40)}, {"mac tmp 05", new Integer(50)}};
 	
 	final static Border obrys= BorderFactory.createLineBorder(Color.black);
 	
@@ -72,9 +78,18 @@ public class Gui extends JFrame {
 		poleDoc = textpane.getStyledDocument();
 		
 		sBar = new JScrollPane(textpane);
-		sBar.setBounds(win.getWidth() / 3, 5, 2 * win.getWidth() / 3 - 15, win.getHeight() / 2 - 40);
+		sBar.setBounds(win.getWidth() / 2, 5, win.getWidth() / 2 - 15, 2 * win.getHeight() / 3 - 40);
 		sBar.setBorder(obrys);
 		textpane.setEditable(false);
+		win.add(sBar);
+		
+		tabModel = new DefaultTableModel();
+		macTab = new JTable(tmp_data, stlpce);
+		
+		sBar = new JScrollPane(macTab);
+		sBar.setBounds(win.getWidth() / 2, 2 * win.getHeight() / 3 - 10, win.getWidth() / 2 - 15, win.getHeight() / 3 - 40);
+		sBar.setBorder(obrys);
+		
 		win.add(sBar);
 		
 		obnov();
