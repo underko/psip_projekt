@@ -1,27 +1,35 @@
 package gui;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 
+import test_pakety.SwitchMain;
+
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
 	
 	static JFrame win;
-	static JButton btn_tmpname;
+	static JButton btn_start;
 	static JTextPane textpane;
 	static JScrollPane sBar, macBar;	
 	static JLabel l_arp, l_tcp, l_udp, l_icmp, l_raw, l_snap, l_llc, l_ipx,	l_sap, l_unkw;
 	static JLabel n_arp, n_tcp, n_udp, n_icmp, n_raw, n_snap, n_llc, n_ipx,	n_sap, n_unkw;
 	static StyledDocument poleDoc;
-	static JComboBox<String> cmbDevices;
+	static JComboBox<String> cmbDev_0, cmbDev_1;
 	static int count_arp, count_tcp, count_udp, count_icmp, count_raw, count_snap, count_unkw;
 	static String[] stlpce = {" MAC adresa", "Port"};
+	public static ArrayList<String> cmbDevArr = new ArrayList<String>();
 	static JTable macTab;
 	static DefaultTableModel tabModel; 
+	
+	private boolean start = true; 
 	
 	static Object[][] macData = {};
 	
@@ -35,6 +43,36 @@ public class Gui extends JFrame {
 		win.setVisible(true);
 		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		win.setLocationRelativeTo(null);
+		
+		//btn start
+		btn_start = new JButton("Start");
+		btn_start.setBounds(5, 2 * win.getHeight() / 3 - 10, 80, 30);
+		win.add(btn_start);
+		
+		btn_start.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				if (start) {
+					SwitchMain.port_0.start();
+					SwitchMain.port_1.start();
+				}
+				else {
+					SwitchMain.port_0.stop();
+					SwitchMain.port_1.stop();
+				}
+			}
+		});
+		
+		//cmb boxy so zariadeniami
+		cmbDev_0 = new JComboBox<String>();
+		cmbDev_0.setBounds(95, 2 * win.getHeight() / 3 - 10, 300, 25);
+		win.add(cmbDev_0);
+		
+		cmbDev_1 = new JComboBox<String>();
+		cmbDev_1.setBounds(95, 2 * win.getHeight() / 3 + 20, 300, 25);
+		win.add(cmbDev_1);
 		
 		//arp
 		count_arp = 0;
@@ -175,6 +213,23 @@ public class Gui extends JFrame {
 		catch (BadLocationException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void naplnCmb() {
+		for (String s: cmbDevArr) {
+			cmbDev_0.addItem(s);
+			cmbDev_1.addItem(s);
+		}
+		
+		obnov();
+	}
+	
+	public static int getDev_0sel() {
+		return cmbDev_0.getSelectedIndex();
+	}
+	
+	public static int getDev_1sel() {
+		return cmbDev_1.getSelectedIndex();
 	}
 	
 	public static void obnov() {
