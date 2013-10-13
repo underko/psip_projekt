@@ -13,6 +13,8 @@ public class SwitchMain {
 	public static PcapIf device_0 = new PcapIf();
 	public static PcapIf device_1 = new PcapIf();
 	public static List<PcapIf> alldevs_tmp; 
+	public static boolean dev_0_aktivny;
+	public static boolean dev_1_aktivny;
 	
 	public static String byteToHex(byte b) {
 	    int i = b & 0xFF;
@@ -51,7 +53,6 @@ public class SwitchMain {
             int r = Pcap.findAllDevs(alldevs, errbuf);
             
             if (r != Pcap.OK) {
-                //System.err.printf("Can't read list of devices, error is %s", errbuf.toString());
                 Gui.vypis(String.format("Can't read list of devices, error is %s\n", errbuf.toString()));
                 return;
             }
@@ -60,7 +61,6 @@ public class SwitchMain {
             	alldevs_tmp.add((PcapIf)dev);
             }
 
-            //System.out.println(alldevs_tmp.size() + " network devices found:");
             Gui.vypis(String.format(" " + alldevs_tmp.size() + " najdene zariadenia pridane do cmb vyberu.\n"));
             
             i = 0;
@@ -75,31 +75,10 @@ public class SwitchMain {
             
             Gui.naplnCmb();
             
-            /*
-            System.out.println("Vyberte 1. zariadenie: ");
-            
-            Scanner scan_n = new Scanner(System.in);
-            Integer n = scan_n.nextInt();
-            
-            device_0 = alldevs_tmp.get(n - 1);
-            
-
-            System.out.println("Vyberte 2. zariadenie: ");
-            
-            scan_n = new Scanner(System.in);
-            n = scan_n.nextInt();
-            
-            device_1 = alldevs_tmp.get(n - 1);
-            */
-            
         } catch (Exception e) {
             System.out.println(e);
         }
         
-        /*
-        	port_0.start();
-        	port_1.start();
-        */
     }
 	
 	public static Thread  port_0 = (new Thread(new Runnable() {
@@ -110,7 +89,7 @@ public class SwitchMain {
 		}
 	}));
 	
-	public static Thread  port_1 = (new Thread(new Runnable() {
+	public static  Thread  port_1 = (new Thread(new Runnable() {
 		
 		PacketHandler ph_1 = new PacketHandler();
 		public void run() {

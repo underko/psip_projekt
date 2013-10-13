@@ -29,7 +29,7 @@ public class Gui extends JFrame {
 	static JTable macTab;
 	static DefaultTableModel tabModel; 
 	
-	private boolean start = true; 
+	public static boolean start = true; 
 	
 	static Object[][] macData = {};
 	
@@ -53,14 +53,20 @@ public class Gui extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				if (start) {
+					btn_start.setText("Stop");
+					start = false;
 					SwitchMain.port_0.start();
+					SwitchMain.dev_0_aktivny = true;
 					SwitchMain.port_1.start();
+					SwitchMain.dev_0_aktivny = true;
 				}
 				else {
-					SwitchMain.port_0.stop();
-					SwitchMain.port_1.stop();
+					btn_start.setText("Start");
+					start = true;
+					
+					while (SwitchMain.dev_0_aktivny == true && SwitchMain.dev_1_aktivny == true);
+						//caka na nastavenie flagov ze thready boli pozastavene (nevykonavaju loop)
 				}
 			}
 		});

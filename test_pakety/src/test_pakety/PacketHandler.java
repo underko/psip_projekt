@@ -13,7 +13,7 @@ import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.protocol.network.Ip4;
 
-public class PacketHandler {
+public class PacketHandler implements Runnable {
 	
 	StringBuilder errbuf = new StringBuilder();
 	int snaplen = 64 * 1024;           	// cely packet
@@ -95,11 +95,11 @@ public class PacketHandler {
 				
 				if (packet.hasHeader(ip)) {
 					String src = new String();
-					String dst = new String();
+					//String dst = new String();
 					int port;
 					
 					src = asString(buffer.getByteArray(6, 6));
-					dst = asString(buffer.getByteArray(0, 6));
+					//dst = asString(buffer.getByteArray(0, 6));
 					port = Integer.parseInt(user);
 					
 					//Gui.vypis(String.format("DST: %s SRC: %s port: %d\n", dst, src, port));
@@ -136,10 +136,23 @@ public class PacketHandler {
         };
         
         while (true) {
-        	pcap.loop(1, jpacketHandler, user);
+        	if (!Gui.start)
+        		pcap.loop(1, jpacketHandler, user);
+        	else {
+        		if (user.equals("0"))
+                	SwitchMain.dev_0_aktivny = false;
+        		if (user.equals("1"))
+                	SwitchMain.dev_1_aktivny = false;
+        	}
         }
         
-        //pcap.close();
+        /*
+		if (user.equals("0"))
+        	SwitchMain.dev_0_aktivny = false;
+		if (user.equals("1"))
+        	SwitchMain.dev_1_aktivny = false;
+		pcap.close();
+        */
 	}
 	
 	private static String asString(final byte[] mac) {  
@@ -159,6 +172,12 @@ public class PacketHandler {
 	    }
 		
 		return buf.toString();  
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
