@@ -1,4 +1,4 @@
-package gui;
+package switch_gui;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -10,7 +10,7 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 
-import test_pakety.SwitchMain;
+import switch_main.SwitchMain;
 
 @SuppressWarnings("serial")
 public class Gui extends JFrame {

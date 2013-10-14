@@ -1,11 +1,14 @@
-package test_pakety;
-
-import gui.Gui;
+package switch_main;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
+
+import switch_gui.Gui;
+import switch_workClasses.PacketHandler;
+import switch_workClasses.RiadokTabulka;
  
 public class SwitchMain {
  
@@ -99,7 +102,7 @@ public class SwitchMain {
 
 	public static boolean obshaujeMac(String mac, int port) {
 		for (RiadokTabulka riadok: macTabList) {
-			if (riadok != null && riadok.macAdresa.equals(mac) && riadok.port == port)
+			if (riadok != null && riadok.getMacAdresa().equals(mac) && riadok.getPort() == port)
 				return true;
 		}
 		

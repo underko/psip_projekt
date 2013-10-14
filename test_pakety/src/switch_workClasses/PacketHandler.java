@@ -1,6 +1,4 @@
-package test_pakety;
-
-import gui.Gui;
+package switch_workClasses;
 
 import java.util.Date;
 
@@ -12,6 +10,9 @@ import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.protocol.network.Ip4;
+
+import switch_gui.Gui;
+import switch_main.SwitchMain;
 
 public class PacketHandler implements Runnable {
 	

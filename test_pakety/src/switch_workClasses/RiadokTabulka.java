@@ -1,4 +1,4 @@
-package test_pakety;
+package switch_workClasses;
 
 public class RiadokTabulka {
 	
