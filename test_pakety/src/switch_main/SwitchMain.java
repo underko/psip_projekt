@@ -70,7 +70,7 @@ public class SwitchMain {
             
             for (PcapIf device: alldevs_tmp) {
                 String description = (device.getDescription() != null) ? device.getDescription(): "No description available";
-                System.out.printf("#%d: %s [%s]\n", ++i, device.getName(), description);
+                System.out.printf("#%d: %s [%s]\n", ++i, device, description);
                 
                 Gui.cmbDevArr.add(description);
                 //Gui.vypis(String.format("#%d: %s [%s]\n", i, device.toString(), description));
