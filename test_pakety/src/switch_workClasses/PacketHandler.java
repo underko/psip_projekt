@@ -109,7 +109,6 @@ public class PacketHandler implements Runnable {
 						SwitchMain.pridajZaznam(src, port);
 						Gui.pridajRiadok(src, port);
 					}
-					
 				}
 	    				
 				System.out.printf("%s, ethertype: %d, port: %d, caplen: %d, len: %d, dip: %s, sip: %s\narp: %d, tcp: %d, udp: %d, icmp: %d, raw: %d, snap: %d, llc: %d, ipx: %d, sap: %d, unkw: %d, user: %s\n", 
@@ -137,8 +136,15 @@ public class PacketHandler implements Runnable {
         };
         
         while (true) {
-        	if (!Gui.start)
+        	if (Gui.mozeZacat == false /*mozeZacat po stlaceni start sa zmeni na false*/) {
+        		if (user.equals("0"))
+                	SwitchMain.dev_0_aktivny = true;
+        		
+        		if (user.equals("1"))
+                	SwitchMain.dev_1_aktivny = true;
+
         		pcap.loop(1, jpacketHandler, user);
+        	}
         	else {
         		if (user.equals("0"))
                 	SwitchMain.dev_0_aktivny = false;
@@ -146,14 +152,6 @@ public class PacketHandler implements Runnable {
                 	SwitchMain.dev_1_aktivny = false;
         	}
         }
-        
-        /*
-		if (user.equals("0"))
-        	SwitchMain.dev_0_aktivny = false;
-		if (user.equals("1"))
-        	SwitchMain.dev_1_aktivny = false;
-		pcap.close();
-        */
 	}
 	
 	private static String asString(final byte[] mac) {  
@@ -180,5 +178,4 @@ public class PacketHandler implements Runnable {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

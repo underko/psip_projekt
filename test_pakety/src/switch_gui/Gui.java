@@ -16,7 +16,7 @@ import switch_main.SwitchMain;
 public class Gui extends JFrame {
 	
 	static JFrame win;
-	static JButton btn_start;
+	static JButton btn_start, btn_reset;
 	static JTextPane textpane;
 	static JScrollPane sBar, macBar;	
 	static JLabel l_arp, l_tcp, l_udp, l_icmp, l_raw, l_snap, l_llc, l_ipx,	l_sap, l_unkw;
@@ -29,7 +29,11 @@ public class Gui extends JFrame {
 	static JTable macTab;
 	static DefaultTableModel tabModel; 
 	
-	public static boolean start = true; 
+	static int dev_0_TTD = 0;
+	static int dev_1_TTD = 0;
+	
+	public static boolean mozeZacat = true; 
+	public static boolean prvy_start = true;
 	
 	static Object[][] macData = {};
 	
@@ -49,25 +53,97 @@ public class Gui extends JFrame {
 		btn_start.setBounds(5, 2 * win.getHeight() / 3 - 10, 80, 30);
 		win.add(btn_start);
 		
+		btn_reset = new JButton("Reset");
+		btn_reset.setBounds(5, 2 * win.getHeight() / 3 + 25, 80, 30);
+		win.add(btn_reset);
+		
 		btn_start.addActionListener(new ActionListener() {
+			
+			@SuppressWarnings("deprecation")
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (mozeZacat) {
+					vypis("Spustam switch ...\n");
+					mozeZacat = false;
+					
+					if (prvy_start) {
+						SwitchMain.port_0.start();
+						while (SwitchMain.dev_0_aktivny == false) {
+							System.out.println("nudaaaa");
+						}
+						vypis("Zariadenie 0 aktivne.\n");
+						
+						SwitchMain.port_1.start();
+						while (SwitchMain.dev_1_aktivny == false){
+							System.out.println("2nudaaaa");
+						}
+						vypis("Zariadenie 1 aktivne.\n");
+					}
+
+					prvy_start = false;
+					btn_start.setText("Stop");
+					vypis("Switch spusteny.\n");
+				}
+				else {
+					vypis("Zastavujem switch ...\n");
+					mozeZacat = true;
+					
+					System.out.println("vypnem to?");
+					
+					while (SwitchMain.dev_0_aktivny == true) {
+						System.out.println("0: " + dev_0_TTD);
+						if (dev_0_TTD > 500000) {
+							SwitchMain.port_0.suspend();
+							vypis("Thread 1 bol nasilne ukonceny,\n");
+							break;
+						}
+						dev_0_TTD++;
+					}
+					
+					dev_0_TTD = 0;
+					
+					vypis("Zariadenie 0 pozastavene.\n");
+					
+					while (SwitchMain.dev_1_aktivny == true) { 
+						System.out.println("1: " + dev_1_TTD);
+						
+						if (dev_1_TTD > 500000) {
+							SwitchMain.port_0.suspend();
+							vypis("Thread 1 bol nasilne ukonceny,\n");
+							break;
+						}
+						
+						dev_1_TTD++;
+					}
+					
+					dev_1_TTD = 0;
+					vypis("Zariadenie 1 pozastavene.\n");
+					System.out.println("dobry som!");
+					
+					btn_start.setText("Start");
+					vypis("switch zastaveny.\n");
+				}
+			}
+		});
+		
+		btn_reset.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (start) {
-					btn_start.setText("Stop");
-					start = false;
-					SwitchMain.port_0.start();
-					SwitchMain.dev_0_aktivny = true;
-					SwitchMain.port_1.start();
-					SwitchMain.dev_0_aktivny = true;
-				}
-				else {
-					btn_start.setText("Start");
-					start = true;
-					
-					while (SwitchMain.dev_0_aktivny == true && SwitchMain.dev_1_aktivny == true);
-						//caka na nastavenie flagov ze thready boli pozastavene (nevykonavaju loop)
-				}
+				vypis("Nulujem zaznamy v tabulke a statistiku ... ");
+				mozeZacat = true;
+				
+				while (SwitchMain.dev_0_aktivny == true);
+				vypis("Zariadenie 0 pozastavene.\n");
+				
+				while (SwitchMain.dev_1_aktivny == true);
+				vypis("Zariadenie 1 pozastavene.\n");
+				
+				SwitchMain.macTabList.clear();
+				vycistiTab();
+				vynulujPocitadlo();
+				
+				vypis("vynulovane.\n");
 			}
 		});
 		
@@ -170,9 +246,17 @@ public class Gui extends JFrame {
 	public int getCount_tcp() {
 		return count_tcp;
 	}
+	
+	public static void incCount_tcp() {
+		count_tcp += 1;
+		n_tcp.setText(String.valueOf(count_tcp));
+		obnov();
+	}
 
-	public void setCount_tcp(int count_tcp) {
+	public static void setCount_tcp(int count_tcp) {
 		Gui.count_tcp = count_tcp;
+		n_tcp.setText(String.valueOf(count_tcp));
+		obnov();
 	}
 	
 	public static void incCount_arp() {
@@ -181,14 +265,20 @@ public class Gui extends JFrame {
 		obnov();
 	}
 	
-	public static void incCount_tcp() {
-		count_tcp += 1;
-		n_tcp.setText(String.valueOf(count_tcp));
+	public static void setCount_arp(int count_arp) {
+		Gui.count_arp = count_arp;
+		n_arp.setText(String.valueOf(count_arp));
 		obnov();
 	}
-
+	
 	public static void incCount_udp() {
 		count_udp += 1;
+		n_udp.setText(String.valueOf(count_udp));
+		obnov();
+	}
+	
+	public static void setCount_udp(int count_udp) {
+		Gui.count_udp = count_udp;
 		n_udp.setText(String.valueOf(count_udp));
 		obnov();
 	}
@@ -199,8 +289,20 @@ public class Gui extends JFrame {
 		obnov();
 	}
 	
+	public static void setCount_icmp(int count_icmp) {
+		Gui.count_icmp = count_icmp;
+		n_icmp.setText(String.valueOf(count_icmp));
+		obnov();
+	}
+	
 	public static void incCount_unkw() {
 		count_unkw += 1;
+		n_unkw.setText(String.valueOf(count_unkw));
+		obnov();
+	}
+	
+	public static void setCount_unkw(int count_unkw) {
+		Gui.count_unkw = count_unkw;
 		n_unkw.setText(String.valueOf(count_unkw));
 		obnov();
 	}
@@ -246,5 +348,19 @@ public class Gui extends JFrame {
 		catch (Exception e) {
 			// to je zle :D
 		}
+	}
+	
+	public static void vynulujPocitadlo() {
+		setCount_arp(0);
+		setCount_icmp(0);
+		setCount_tcp(0);
+		setCount_udp(0);
+		setCount_unkw(0);
+		obnov();
+	}
+	
+	public void vycistiTab() {
+		tabModel.setRowCount(0);
+		obnov();
 	}
 }
