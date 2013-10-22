@@ -68,10 +68,10 @@ public class PacketHandler implements Runnable {
 				JBuffer buffer = packet;
 				Ethernet eth = new Ethernet();
 				Ip4 ip = new Ip4();
-				System.out.println("tu som skus ma");			////
+				System.out.println("tu som skus ma");								////
 				if (packet.hasHeader(Ethernet.ID)) {
 					eth = packet.getHeader(eth);
-					System.out.println("tu som eth");			////
+					System.out.println("tu som eth");								////
 					String srcMac = asString(buffer.getByteArray(6, 6));
 					String dstMac = asString(buffer.getByteArray(0, 6));			//pouzijeme na posielanie
 					
