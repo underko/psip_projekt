@@ -1,6 +1,7 @@
 package switch_gui;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -16,21 +17,26 @@ import switch_main.SwitchMain;
 public class Gui extends JFrame {
 	
 	static JFrame win;
-	static JButton btn_start, btn_reset;
+	static JButton btn_start, btn_reset, btn_addFilter;
 	static JTextPane textpane;
 	static JScrollPane sBar, macBar;	
+	static JLabel l_filter;
 	static JLabel l_arp, l_tcp, l_udp, l_icmp, l_raw, l_snap, l_llc, l_ipx,	l_sap, l_unkw;
 	static JLabel n_arp, n_tcp, n_udp, n_icmp, n_raw, n_snap, n_llc, n_ipx,	n_sap, n_unkw;
 	static StyledDocument poleDoc;
-	static JComboBox<String> cmbDev_0, cmbDev_1;
+	static JComboBox<String> cmbDev_0, cmbDev_1, cmbFlt;
 	static int count_arp, count_tcp, count_udp, count_icmp, count_raw, count_snap, count_unkw;
 	static String[] stlpce = {" MAC adresa", "Port"};
-	public static ArrayList<String> cmbDevArr = new ArrayList<String>();
 	static JTable macTab;
-	static DefaultTableModel tabModel; 
+	static DefaultTableModel tabModel;
+	static JTextField fld_filter;
+	
+	public static ArrayList<String> cmbDevArr = new ArrayList<String>();
 	
 	static int dev_0_TTD = 0;
 	static int dev_1_TTD = 0;
+	
+	final static Font font = new Font("Courier", Font.PLAIN, 12);
 	
 	public static boolean mozeZacat = true; 
 	public static boolean prvy_start = true;
@@ -38,6 +44,9 @@ public class Gui extends JFrame {
 	static Object[][] macData = {};
 	
 	final static Border obrys= BorderFactory.createLineBorder(Color.black);
+	
+	protected final int timeout = 5;
+	protected final String[] cmbFltArr = {"port 0", "port 1", "port 0 & port 1"};
 	
 	public void gui() {
 		
@@ -53,99 +62,25 @@ public class Gui extends JFrame {
 		btn_start.setBounds(5, 2 * win.getHeight() / 3 - 10, 80, 30);
 		win.add(btn_start);
 		
+		//btn reset
 		btn_reset = new JButton("Reset");
 		btn_reset.setBounds(5, 2 * win.getHeight() / 3 + 25, 80, 30);
 		win.add(btn_reset);
 		
-		btn_start.addActionListener(new ActionListener() {
-			
-			@SuppressWarnings("deprecation")
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (mozeZacat) {
-					vypis("Spustam switch ...\n");
-					mozeZacat = false;
-					
-					if (prvy_start) {
-						SwitchMain.port_0.start();
-						while (SwitchMain.dev_0_aktivny == false) {
-							System.out.println("nudaaaa");
-						}
-						vypis("Zariadenie 0 aktivne.\n");
-						
-						SwitchMain.port_1.start();
-						while (SwitchMain.dev_1_aktivny == false){
-							System.out.println("2nudaaaa");
-						}
-						vypis("Zariadenie 1 aktivne.\n");
-					}
-
-					prvy_start = false;
-					btn_start.setText("Stop");
-					vypis("Switch spusteny.\n");
-				}
-				else {
-					vypis("Zastavujem switch ...\n");
-					mozeZacat = true;
-					
-					System.out.println("vypnem to?");
-					
-					while (SwitchMain.dev_0_aktivny == true) {
-						System.out.println("0: " + dev_0_TTD);
-						if (dev_0_TTD > 500000) {
-							SwitchMain.port_0.suspend();
-							vypis("Thread 1 bol nasilne ukonceny,\n");
-							break;
-						}
-						dev_0_TTD++;
-					}
-					
-					dev_0_TTD = 0;
-					
-					vypis("Zariadenie 0 pozastavene.\n");
-					
-					while (SwitchMain.dev_1_aktivny == true) { 
-						System.out.println("1: " + dev_1_TTD);
-						
-						if (dev_1_TTD > 500000) {
-							SwitchMain.port_0.suspend();
-							vypis("Thread 1 bol nasilne ukonceny,\n");
-							break;
-						}
-						
-						dev_1_TTD++;
-					}
-					
-					dev_1_TTD = 0;
-					vypis("Zariadenie 1 pozastavene.\n");
-					System.out.println("dobry som!");
-					
-					btn_start.setText("Start");
-					vypis("switch zastaveny.\n");
-				}
-			}
-		});
+		//btn filter
+		btn_addFilter = new JButton("Pridaj");
+		btn_addFilter.setBounds(5, win.getHeight() / 3, 80, 30);
+		win.add(btn_addFilter);
 		
-		btn_reset.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				vypis("Nulujem zaznamy v tabulke a statistiku ... ");
-				mozeZacat = true;
-				
-				while (SwitchMain.dev_0_aktivny == true);
-				vypis("Zariadenie 0 pozastavene.\n");
-				
-				while (SwitchMain.dev_1_aktivny == true);
-				vypis("Zariadenie 1 pozastavene.\n");
-				
-				SwitchMain.macTabList.clear();
-				vycistiTab();
-				vynulujPocitadlo();
-				
-				vypis("vynulovane.\n");
-			}
-		});
+		//filter txt field
+		fld_filter = new JTextField("(not src net 192.168.1.101) and (not src net 192.168.1.102)");
+		fld_filter.setBounds(5, win.getHeight() / 3 - 30, win.getWidth() / 2 - 10, 25);
+		win.add(fld_filter);
+		
+		//filter label
+		l_filter = new JLabel("Filter:");
+		l_filter.setBounds(5, win.getHeight() / 3 - 50, win.getWidth() / 2 - 10, 25);
+		win.add(l_filter);
 		
 		//cmb boxy so zariadeniami
 		cmbDev_0 = new JComboBox<String>();
@@ -155,6 +90,11 @@ public class Gui extends JFrame {
 		cmbDev_1 = new JComboBox<String>();
 		cmbDev_1.setBounds(95, 2 * win.getHeight() / 3 + 20, 300, 25);
 		win.add(cmbDev_1);
+		
+		//cmb Filter
+		cmbFlt = new JComboBox<String>(cmbFltArr);
+		cmbFlt.setBounds(90, win.getHeight() / 3, 100, 25);
+		win.add(cmbFlt);
 		
 		//arp
 		count_arp = 0;
@@ -225,6 +165,7 @@ public class Gui extends JFrame {
 		sBar.setBounds(win.getWidth() / 2, 5, win.getWidth() / 2 - 15, 2 * win.getHeight() / 3 - 40);
 		sBar.setBorder(obrys);
 		textpane.setEditable(false);
+		textpane.setFont(font);
 		win.add(sBar);
 		
 		//mac tab
@@ -241,6 +182,129 @@ public class Gui extends JFrame {
 		win.add(sBar);
 		
 		obnov();
+		
+		//action listenery
+		btn_start.addActionListener(new ActionListener() {
+			
+			@SuppressWarnings("deprecation")
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (mozeZacat) {
+					vypis("Spustam switch ...\n");
+					mozeZacat = false;
+					
+					if (prvy_start) {
+						SwitchMain.port_0.start();
+						SwitchMain.port_1.start();
+					}
+					
+					while (SwitchMain.dev_0_aktivny == false) {
+						System.out.println("while dev_0 :: dev_0: " + SwitchMain.dev_0_aktivny + " dev_1: " + SwitchMain.dev_1_aktivny);
+						//no co mam robit : /
+					}
+					vypis("Zariadenie 0 aktivne.\n");
+
+					while (SwitchMain.dev_1_aktivny == false){
+						System.out.println("while dev_1 :: dev_0: " + SwitchMain.dev_0_aktivny + " dev_1: " + SwitchMain.dev_1_aktivny);
+						//no nic musis pockat :)
+					}
+					vypis("Zariadenie 1 aktivne.\n");
+					
+					prvy_start = false;
+					btn_start.setText("Stop");
+					
+					vypis("Switch spusteny.\n");
+				}
+				else {
+					vypis("Zastavujem switch ...\n");
+					mozeZacat = true;
+					
+					System.out.println("vypnem to?");
+					
+					while (SwitchMain.dev_0_aktivny == true) {
+						System.out.println("dev_0 vypinanie: " + dev_0_TTD);
+						
+						if (dev_0_TTD > timeout) {
+							SwitchMain.port_0.suspend();
+							vypis("Thread 1 bol nasilne ukonceny,\n");
+							break;
+						}
+						
+						try {
+						    Thread.sleep(1000);
+						} catch(InterruptedException ex) {
+						    Thread.currentThread().interrupt();
+						}
+						dev_0_TTD++;
+					}
+					
+					vypis("Zariadenie 0 pozastavene.\n");
+					
+					while (SwitchMain.dev_1_aktivny == true) { 
+						System.out.println("dev_1 vypinanie: " + dev_1_TTD);
+						
+						if (dev_1_TTD > timeout) {
+							SwitchMain.port_0.suspend();
+							vypis("Thread 1 bol nasilne ukonceny,\n");
+							break;
+						}
+						
+						try {
+						    Thread.sleep(1000);
+						} catch(InterruptedException ex) {
+						    Thread.currentThread().interrupt();
+						}
+						dev_1_TTD++;
+					}
+					
+					vypis("Zariadenie 1 pozastavene.\n");
+					
+					dev_0_TTD = 0;
+					dev_1_TTD = 0;
+					
+					btn_start.setText("Start");
+					vypis("Switch zastaveny.\n");
+				}
+			}
+		});
+		
+		btn_reset.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				vypis("Nulujem zaznamy v tabulke a statistiku ... \n");
+				
+				SwitchMain.macTabList.clear();
+				vycistiTab();
+				vynulujPocitadlo();
+				
+				vypis("Vynulovane.\n");
+			}
+		});
+		
+		btn_addFilter.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				vypis("Pridavam novy filter ...\n");
+				
+				switch(cmbFlt.getSelectedIndex()) {
+					case 0:	//port 0
+						SwitchMain.pridajFilter_0(fld_filter.getText());
+						break;
+					case 1:	//port 1
+						SwitchMain.pridajFilter_1(fld_filter.getText());
+						break;
+					case 2:	//port 0 & port 1
+						SwitchMain.pridajFilter_0(fld_filter.getText());
+						SwitchMain.pridajFilter_1(fld_filter.getText());
+						break;
+					default:
+						break;
+				}
+				
+			}
+		});
 	}
 	
 	public int getCount_tcp() {
