@@ -51,7 +51,7 @@ public class PacketHandler implements Runnable {
         	return;
         }
         
-        pcap.setDirection(Direction.OUT);
+        pcap.setDirection(Direction.IN);
         
         System.out.println("Zacinam tahat packety ...");
 		
@@ -61,70 +61,99 @@ public class PacketHandler implements Runnable {
 			int n_raw, n_snap, n_llc, n_ipx, n_sap;
 			int unkw;
 			int actual;
-			int port;
+			int port, index;
 	            	
 			public void nextPacket(PcapPacket packet, String user) {
 
 				JBuffer buffer = packet;
 				Ethernet eth = new Ethernet();
 				Ip4 ip = new Ip4();
-				System.out.println("tu som skus ma");								////
+
+				
+				System.out.println("ide packet");
+				if (packet.hasHeader(Ethernet.ID))
+					System.out.println("ma ethernet.id header");
+				else
+					System.out.println("nema ethernet.id header");
+				
 				if (packet.hasHeader(Ethernet.ID)) {
 					eth = packet.getHeader(eth);
-					System.out.println("tu som eth");								////
 					String srcMac = asString(buffer.getByteArray(6, 6));
 					String dstMac = asString(buffer.getByteArray(0, 6));			//pouzijeme na posielanie
 					
-					port = Integer.parseInt(user);
-					
-					if (!SwitchMain.obshaujeMac(srcMac, port)) {
-						SwitchMain.pridajZaznam(srcMac, port);
-						Gui.pridajRiadok(srcMac, port);
+					if (srcMac == "08:00:27:00:C0:68") {
+						System.out.println("znova at mackovina prisla na port " + user);
 					}
+					else {
+					
+					port = Integer.parseInt(user);
+					index = SwitchMain.getCisloRiadku(srcMac);
+
+					System.out.println(String.format("index: %d, src: %s size: %d", index, srcMac, SwitchMain.macTabList.size()));
+					
+					if (index != -1)
+						SwitchMain.odstranZaznam(index);
+					
+					SwitchMain.pridajZaznam(srcMac, port);
+					Gui.obnovRiadky();
 					
 					//pridanie do radu na prislusny port
 					int port_tmp = SwitchMain.obsahujeMac(dstMac);
 					
+					System.out.println("prisiel packet z " + user + " a ide na port " + port_tmp);
+					
 					switch (port_tmp) {
 						case 0:
+							if (user == "0") break;										//prislo z rovnokaho portu kam by malo ist takze discard
 							SwitchMain.quePort_0.add(packet);
 							break;
 						case 1:
+							if (user == "1") break;										//prislo z rovnokaho portu kam by malo ist takze discard
 							SwitchMain.quePort_1.add(packet);
 							break;
 						default:
-							SwitchMain.quePort_0.add(packet);
-							SwitchMain.quePort_1.add(packet);	
+							if (user == "1") {
+								System.out.println("user 1 dava packet na port 0");
+								SwitchMain.quePort_0.add(packet);
+								break;
+							}
+							else if (user == "0") {
+								System.out.println("user 0 dava packet na port 1");
+								SwitchMain.quePort_1.add(packet);
+								break;	
+							}								
 							break;
 					}
 					
 					//vyposielanie vsetkeho co mam
 					if (user != null && user == "0") {
-						System.out.println("port 0 idem posielat");
+						System.out.printf("port 0 idem posielat %d\n", SwitchMain.quePort_0.size());
 						while (!SwitchMain.quePort_0.isEmpty()) {
-							System.out.println("port 0 posielam");
 							pcap.sendPacket(SwitchMain.quePort_0.get(0));
-							System.out.println("posielam 0: " + SwitchMain.quePort_0.get(0));
+							System.out.println("posielam na port 0: " + SwitchMain.quePort_0.get(0));
 							SwitchMain.quePort_0.remove(0);
 						}
 					}
 					else if (user != null && user == "1") {
-						System.out.println("port 1 idem posielat");
+						System.out.printf("port 1 idem posielat %d\n", SwitchMain.quePort_1.size());
 						while (!SwitchMain.quePort_1.isEmpty()) {
-							System.out.println("port 1 posielam");
 							pcap.sendPacket(SwitchMain.quePort_1.get(0));
-							System.out.println("posielam 1: " + SwitchMain.quePort_0.get(0));
+							System.out.println("posielam na port 1: " + SwitchMain.quePort_1.get(0));
 							SwitchMain.quePort_1.remove(0);
 						}
 					}
+					
+					}		//////else
 				}
 				
 				actual = buffer.getUShort(12);
 				
 				if (actual >= 1536) {
 					//je to ethernet 2 atd...
-					if (actual == 2054)
+					if (actual == 2054) {
 						n_arp++;
+						Gui.incCount_arp();
+					}
 					else if (actual == 2048) {
     						switch (buffer.getUByte(23)) {
 							case 1: n_icmp++; Gui.incCount_icmp(); break;
@@ -148,50 +177,23 @@ public class PacketHandler implements Runnable {
 						}
 					}
 				}
-				
-				System.out.printf("%s, ethertype: %d, port: %d, caplen: %d, len: %d, dip: %s, sip: %s\narp: %d, tcp: %d, udp: %d, icmp: %d, raw: %d, snap: %d, llc: %d, ipx: %d, sap: %d, unkw: %d, user: %s\n", 
-						new Date(packet.getCaptureHeader().timestampInMillis()),
-						buffer.getUShort(12),
-						port,
-						packet.getCaptureHeader().caplen(), 
-						packet.getCaptureHeader().wirelen(),
-						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).destination()),
-						org.jnetpcap.packet.format.FormatUtils.ip(packet.getHeader(ip).source()),
-						n_arp,
-						n_tcp,
-						n_udp, 
-						n_icmp,
-						n_raw, 
-						n_snap, 
-						n_llc, 
-						n_ipx, 
-						n_sap,
-						unkw,
-						user
-				);
 			}
         };
         
         while (true) {
-        	System.out.println("tu som mozem zacat?" + user);				////
         	if (Gui.mozeZacat == false /*mozeZacat po stlaceni start sa zmeni na false*/) {
-        		System.out.println("mozezacat == false" + user);			////
+        		System.out.println("posielame  " + user);
         		if (user.equals("0")) {
-        			System.out.println("nastavujem 0 na true");
                 	SwitchMain.dev_0_aktivny = true;
         		}
         		if (user.equals("1")) {
-        			System.out.println("nastavujem 1 na true");
                 	SwitchMain.dev_1_aktivny = true;
         		}
         		
-        		//pcap.loop(1, jpacketHandler, user);
-        		
         		pcap.dispatch(1, jpacketHandler, user);
-        			
+        		System.out.println("loop " + user);	
         	}
         	else {
-        		System.out.println("mozezacat == true"  + user);			////
         		if (user.equals("0"))
                 	SwitchMain.dev_0_aktivny = false;
         		if (user.equals("1"))

@@ -5,13 +5,13 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.*;
 
 import switch_main.SwitchMain;
+import switch_workClasses.RiadokTabulka;
 
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
@@ -371,9 +371,22 @@ public class Gui extends JFrame {
 		obnov();
 	}
 	
-	public static void pridajRiadok(String mac, int port) {
+	public static void obnovRiadky() {
 		
-		tabModel.addRow(new Object[]{mac, port});
+		System.out.println(String.format("pocet riadokov: %d", tabModel.getRowCount()));
+		
+		/*if (tabModel.getRowCount() != 0) {
+			while (tabModel.getRowCount() != 0) {
+				System.out.println(String.format("odstranujem %d z %d", tabModel.getRowCount() - 1, tabModel.getRowCount()));
+				tabModel.removeRow(tabModel.getRowCount() - 1);
+			}
+		}*/
+		
+		tabModel.setRowCount(0);
+		
+		for (RiadokTabulka riadok: SwitchMain.macTabList)
+			tabModel.addRow(new Object[]{riadok.getMacAdresa(), riadok.getPort()});
+		
 		tabModel.fireTableDataChanged();
 	}
 	

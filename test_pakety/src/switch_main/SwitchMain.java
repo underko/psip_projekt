@@ -78,7 +78,6 @@ public class SwitchMain {
                 String description = (device.getDescription() != null) ? device.getDescription(): "No description available";
                 System.out.printf("#%d: %s [%s]\n", ++i, device, description);
                 Gui.cmbDevArr.add(description);
-                //Gui.vypis(String.format("#%d: %s [%s]\n", i, device.toString(), description));
             }
             
             Gui.naplnCmb();
@@ -86,10 +85,9 @@ public class SwitchMain {
         } catch (Exception e) {
             System.out.println(e);
         }
-        
     }
 	
-	static String filter_0 = "ip";
+	static String filter_0 = "";
 	
 	public static Thread  port_0 = (new Thread(new Runnable() {
 		
@@ -99,7 +97,7 @@ public class SwitchMain {
 		}
 	}));
 	
-	static String filter_1 = "ip";
+	static String filter_1 = "";
 	
 	public static  Thread  port_1 = (new Thread(new Runnable() {
 		
@@ -109,18 +107,44 @@ public class SwitchMain {
 		}
 	}));
 
-	public static boolean obshaujeMac(String mac, int port) {
+	public static boolean obshaujeMac(String mac) {
 		for (RiadokTabulka riadok: macTabList) {
-			if (riadok != null && riadok.getMacAdresa().equals(mac) && riadok.getPort() == port)
+			if (riadok != null && riadok.getMacAdresa().equals(mac))
 				return true;
 		}
 		
 		return false;
 	}
 	
+	public static int getCisloRiadku(String mac) {
+		int index = -1;
+		for (RiadokTabulka riadok: macTabList) {
+			index++;
+			
+			if (riadok != null && riadok.getMacAdresa().equals(mac))
+				return index;;
+		}
+		return -1;
+	}
+	
 	public static void pridajZaznam(String mac, int port) {
 		SwitchMain.macTabList.add(new RiadokTabulka(mac, port));
 		Gui.vypis(String.format("Pridany novy CAM zaznam:\n%s z portu %d\n", mac, port));
+	}
+	
+	public static void odstranZaznam(String mac) {
+		int n = 0;
+		for (RiadokTabulka riadok: macTabList) {
+			if (riadok != null && riadok.getMacAdresa().equals(mac))
+				break;
+			n++;
+		}
+		
+		macTabList.remove(n);
+	}
+	
+	public static void odstranZaznam(int index) {
+		macTabList.remove(index);
 	}
 	
 	public static int obsahujeMac(String mac) {
