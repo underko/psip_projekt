@@ -181,10 +181,15 @@ public class SwitchMain {
 	}
 	
 	public static void pridajDoPrijatePort_0_1(PcapPacket packet, int port) {
+		PoslanyPacket pkt = new PoslanyPacket();
+		pkt.setPacket(packet);
+		
 		if (port == 0)
-			prijatePort_0.add(new PoslanyPacket(packet));
+			prijatePort_0.add(pkt);
+		else if (port == 1)
+			prijatePort_1.add(pkt);
 		else
-			prijatePort_1.add(new PoslanyPacket(packet));
+			System.out.println("to co mi davate?");
 	}
 	
 	public static void odstranZPrijatePort_0_1(PcapPacket packet, int port) {

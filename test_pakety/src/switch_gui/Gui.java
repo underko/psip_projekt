@@ -373,11 +373,7 @@ public class Gui extends JFrame {
 	}
 	
 	public static void obnovRiadky() {
-		
-		System.out.println(String.format("pocet riadokov: %d", tabModel.getRowCount()));
-		
 		tabModel.setRowCount(0);
-		
 		
 		try {
 			for (RiadokTabulka riadok: SwitchMain.macTabList)
