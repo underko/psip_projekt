@@ -9,6 +9,7 @@ import org.jnetpcap.packet.PcapPacket;
 
 import switch_gui.Gui;
 import switch_workClasses.PacketHandler;
+import switch_workClasses.PoslanyPacket;
 import switch_workClasses.RiadokTabulka;
  
 public class SwitchMain {
@@ -25,10 +26,13 @@ public class SwitchMain {
 	public static ArrayList<PcapPacket> quePort_0 = new ArrayList<PcapPacket>();
 	public static ArrayList<PcapPacket> quePort_1 = new ArrayList<PcapPacket>();
 	
+	public static ArrayList<PoslanyPacket> prijatePort_0 = new ArrayList<PoslanyPacket>();
+	public static ArrayList<PoslanyPacket> prijatePort_1 = new ArrayList<PoslanyPacket>();
+	
 	public static String byteToHex(byte b) {
 	    int i = b & 0xFF;
 	    return Integer.toHexString(i);
-	  }
+	}
 	
 	public static String bytesToHexString(byte[] bytes) { 
 		StringBuilder sb = new StringBuilder(); 
@@ -129,7 +133,7 @@ public class SwitchMain {
 	
 	public static void pridajZaznam(String mac, int port) {
 		SwitchMain.macTabList.add(new RiadokTabulka(mac, port));
-		Gui.vypis(String.format("Pridany novy CAM zaznam:\n%s z portu %d\n", mac, port));
+		//Gui.vypis(String.format("Pridany novy CAM zaznam:\n%s z portu %d\n", mac, port));
 	}
 	
 	public static void odstranZaznam(String mac) {
@@ -154,7 +158,59 @@ public class SwitchMain {
 		}
 		return -1;
 	}
-
+	
+	//funkcie na zistenie ci uz som dany packet posielal
+	
+	public static boolean obsahujePrijatePort_0_1(PcapPacket packet, int port) {
+		if (port == 0) {
+			for (PoslanyPacket pkt: prijatePort_0) {
+				if (pkt != null && pkt.getPacket().toHexdump().equals(packet.toHexdump()))
+					return true;
+			}
+			return false;
+		}
+		else if (port == 1){
+			for (PoslanyPacket pkt: prijatePort_1) {
+				if (pkt != null && pkt.getPacket().toHexdump().equals(packet.toHexdump()))
+					return true;
+			}
+			return false;
+		}
+		
+		return false;
+	}
+	
+	public static void pridajDoPrijatePort_0_1(PcapPacket packet, int port) {
+		if (port == 0)
+			prijatePort_0.add(new PoslanyPacket(packet));
+		else
+			prijatePort_1.add(new PoslanyPacket(packet));
+	}
+	
+	public static void odstranZPrijatePort_0_1(PcapPacket packet, int port) {
+		int index = -1;
+		if (port == 0) {
+			for (PoslanyPacket pkt: prijatePort_0) {
+				index++;
+				if (pkt != null && pkt.getPacket().toHexdump().equals(packet.toHexdump()))
+					break;
+			}
+			
+			prijatePort_0.remove(index);
+		}
+		else if (port == 1) {
+			for (PoslanyPacket pkt: prijatePort_1) {
+				index++;
+				if (pkt != null && pkt.getPacket().toHexdump().equals(packet.toHexdump()))
+					break;
+			}
+			
+			prijatePort_1.remove(index);
+		}
+		else 
+			Gui.vypis("Chyba pri mazani z prijatych\n");
+	}
+	
 	public static void pridajFilter_0(String text) {
 		filter_0 = filter_0 + " and " + text;
 		Gui.vypis("Aktualny filter pre port 0:\n" + filter_0 + "\n");

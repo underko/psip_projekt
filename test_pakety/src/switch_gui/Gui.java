@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
@@ -375,17 +376,16 @@ public class Gui extends JFrame {
 		
 		System.out.println(String.format("pocet riadokov: %d", tabModel.getRowCount()));
 		
-		/*if (tabModel.getRowCount() != 0) {
-			while (tabModel.getRowCount() != 0) {
-				System.out.println(String.format("odstranujem %d z %d", tabModel.getRowCount() - 1, tabModel.getRowCount()));
-				tabModel.removeRow(tabModel.getRowCount() - 1);
-			}
-		}*/
-		
 		tabModel.setRowCount(0);
 		
-		for (RiadokTabulka riadok: SwitchMain.macTabList)
-			tabModel.addRow(new Object[]{riadok.getMacAdresa(), riadok.getPort()});
+		
+		try {
+			for (RiadokTabulka riadok: SwitchMain.macTabList)
+				tabModel.addRow(new Object[]{riadok.getMacAdresa(), riadok.getPort()});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		tabModel.fireTableDataChanged();
 	}

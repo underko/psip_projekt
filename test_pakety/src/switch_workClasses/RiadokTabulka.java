@@ -2,8 +2,8 @@ package switch_workClasses;
 
 public class RiadokTabulka {
 	
-	int port;
-	String macAdresa;
+	private int port;
+	private String macAdresa;
 	
 	public RiadokTabulka(String mac, int port) {
 		this.macAdresa = mac;
