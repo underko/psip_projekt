@@ -197,6 +197,7 @@ public class Gui extends JFrame {
 					if (prvy_start) {
 						SwitchMain.port_0.start();
 						SwitchMain.port_1.start();
+						SwitchMain.posielaj.start();
 					}
 					
 					while (SwitchMain.dev_0_aktivny == false) {

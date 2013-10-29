@@ -31,12 +31,12 @@ public class PacketHandler implements Runnable {
         }
         
         System.out.println(user + " >>>>> " + device + " otvorene.");										//debug
-
+        
         //nastavenie filtru
         PcapBpfProgram program = new PcapBpfProgram();
         int opt = 0;
         int mask = 0xffffff00;
-
+        
         if (pcap.compile(program, filter, opt, mask) != Pcap.OK) {
         	System.out.println(pcap.getErr());
         	return;
@@ -49,7 +49,7 @@ public class PacketHandler implements Runnable {
         	return;
         }
         
-        pcap.setDirection(Direction.IN);				//aj tak nejde : /
+        pcap.setDirection(Direction.IN);																	//aj tak nejde : /
         
         System.out.println(user + ": zacinam tahat packety ...");
 		
@@ -83,7 +83,7 @@ public class PacketHandler implements Runnable {
 							SwitchMain.odstranZaznam(index);
 						
 						SwitchMain.pridajZaznam(srcMac, port);
-						Gui.obnovRiadky();
+						//Gui.obnovRiadky();
 						
 						//pridanie do radu na prislusny port
 						int port_tmp = SwitchMain.obsahujeMac(dstMac);
@@ -172,8 +172,7 @@ public class PacketHandler implements Runnable {
         		}
         		
         		int tmp = pcap.dispatch(1, jpacketHandler, user);
-        		System.out.println(user + ": cyklus a mam poslat\nport 0: " + SwitchMain.quePort_0.size() + "\nport 1: " + SwitchMain.quePort_1.size() + "\ntmp: " + tmp);
-        		posliPacket(user);
+        		
         	}
         	else {
         		if (user.equals("0"))

@@ -9,6 +9,7 @@ import org.jnetpcap.packet.PcapPacket;
 
 import switch_gui.Gui;
 import switch_workClasses.PacketHandler;
+import switch_workClasses.Posielanie;
 import switch_workClasses.PoslanyPacket;
 import switch_workClasses.RiadokTabulka;
  
@@ -93,7 +94,7 @@ public class SwitchMain {
         }
     }
 	
-	static String filter_0 = "";
+	static String filter_0 = "arp or icmp";
 	
 	public static Thread  port_0 = (new Thread(new Runnable() {
 		
@@ -104,7 +105,7 @@ public class SwitchMain {
 		}
 	}));
 	
-	static String filter_1 = "";
+	static String filter_1 = "arp or icmp";
 	
 	public static  Thread  port_1 = (new Thread(new Runnable() {
 		
@@ -112,6 +113,14 @@ public class SwitchMain {
 		public void run() {
 			//System.out.println(alldevs_tmp.get(Gui.getDev_1sel()));
 			ph_1.getPacket(alldevs_tmp.get(Gui.getDev_1sel()), filter_1, "1");
+		}
+	}));
+	
+	public static Thread  posielaj = (new Thread(new Runnable() {
+		
+		Posielanie psl = new Posielanie();
+		public void run() {
+			psl.PosliPacket();
 		}
 	}));
 
