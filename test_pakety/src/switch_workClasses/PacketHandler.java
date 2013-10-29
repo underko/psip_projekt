@@ -1,8 +1,5 @@
 package switch_workClasses;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
@@ -19,7 +16,7 @@ public class PacketHandler implements Runnable {
 	
 	StringBuilder errbuf = new StringBuilder();
 	int snaplen = 64 * 1024;           	// cely packet
-    int flags = Pcap.MODE_NON_BLOCKING; 	// vsetko co pride na sietovu kartu
+    int flags = Pcap.MODE_PROMISCUOUS; 	// vsetko co pride na sietovu kartu
     int timeout = 1 * 1000;           	// 10ms
 	static Pcap pcap = null;
 	
@@ -33,7 +30,7 @@ public class PacketHandler implements Runnable {
             return;
         }
         
-        System.out.println(device.getDescription() + " otvorene.");										//debug
+        System.out.println(user + " >>>>> " + device + " otvorene.");										//debug
 
         //nastavenie filtru
         PcapBpfProgram program = new PcapBpfProgram();
@@ -52,9 +49,9 @@ public class PacketHandler implements Runnable {
         	return;
         }
         
-        pcap.setDirection(Direction.IN);
+        pcap.setDirection(Direction.IN);				//aj tak nejde : /
         
-        System.out.println("Zacinam tahat packety ...");
+        System.out.println(user + ": zacinam tahat packety ...");
 		
         PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 
@@ -124,6 +121,7 @@ public class PacketHandler implements Runnable {
 									break;	
 								}								
 							default:
+								System.out.println(user + ": default");
 								//nic nebude :D
 								break;
 						}
@@ -152,12 +150,15 @@ public class PacketHandler implements Runnable {
 				
 					}
 					else {
+						System.out.println(user + ": wtf !? taky tu uz bol !\n");
 						Gui.vypis(user + ": wtf !? taky tu uz bol !\n");
 						SwitchMain.odstranZPrijatePort_0_1(packet, port);
 					}
 					
 					System.out.println("\n");
 				}
+				else
+					System.out.println("nejaky bullshajt");
 			}
         };
         
@@ -170,7 +171,8 @@ public class PacketHandler implements Runnable {
                 	SwitchMain.dev_1_aktivny = true;
         		}
         		
-        		pcap.dispatch(1, jpacketHandler, user);
+        		int tmp = pcap.dispatch(1, jpacketHandler, user);
+        		System.out.println(user + ": cyklus a mam poslat\nport 0: " + SwitchMain.quePort_0.size() + "\nport 1: " + SwitchMain.quePort_1.size() + "\ntmp: " + tmp);
         		posliPacket(user);
         	}
         	else {

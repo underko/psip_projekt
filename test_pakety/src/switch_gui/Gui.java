@@ -46,7 +46,7 @@ public class Gui extends JFrame {
 	
 	final static Border obrys= BorderFactory.createLineBorder(Color.black);
 	
-	protected final int timeout = 5;
+	protected final int timeout = 3;
 	protected final String[] cmbFltArr = {"port 0", "port 1", "port 0 & port 1"};
 	
 	public void gui() {
@@ -200,14 +200,12 @@ public class Gui extends JFrame {
 					}
 					
 					while (SwitchMain.dev_0_aktivny == false) {
-						System.out.println("while dev_0 :: dev_0: " + SwitchMain.dev_0_aktivny + " dev_1: " + SwitchMain.dev_1_aktivny);
-						//no co mam robit : /
+						System.out.printf("");
 					}
 					vypis("Zariadenie 0 aktivne.\n");
 
 					while (SwitchMain.dev_1_aktivny == false){
-						System.out.println("while dev_1 :: dev_0: " + SwitchMain.dev_0_aktivny + " dev_1: " + SwitchMain.dev_1_aktivny);
-						//no nic musis pockat :)
+						System.out.printf("");
 					}
 					vypis("Zariadenie 1 aktivne.\n");
 					
@@ -379,7 +377,6 @@ public class Gui extends JFrame {
 			for (RiadokTabulka riadok: SwitchMain.macTabList)
 				tabModel.addRow(new Object[]{riadok.getMacAdresa(), riadok.getPort()});
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -406,10 +403,12 @@ public class Gui extends JFrame {
 	}
 	
 	public static int getDev_0sel() {
+		System.out.println("dev_0 " + cmbDev_0.getSelectedIndex());
 		return cmbDev_0.getSelectedIndex();
 	}
 	
 	public static int getDev_1sel() {
+		System.out.println("dev_1 " + cmbDev_1.getSelectedIndex());
 		return cmbDev_1.getSelectedIndex();
 	}
 	

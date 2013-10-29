@@ -78,10 +78,12 @@ public class SwitchMain {
             
             i = 0;
             
+            int hashtag = 0;
+            
             for (PcapIf device: alldevs_tmp) {
                 String description = (device.getDescription() != null) ? device.getDescription(): "No description available";
                 System.out.printf("#%d: %s [%s]\n", ++i, device, description);
-                Gui.cmbDevArr.add(description);
+                Gui.cmbDevArr.add(new String(hashtag++ + ": " + description));
             }
             
             Gui.naplnCmb();
@@ -97,7 +99,8 @@ public class SwitchMain {
 		
 		PacketHandler ph_0 = new PacketHandler();
 		public void run() {
-				ph_0.getPacket(alldevs_tmp.get(Gui.getDev_0sel()), filter_0, "0");
+			//System.out.println(alldevs_tmp.get(Gui.getDev_0sel()));
+			ph_0.getPacket(alldevs_tmp.get(Gui.getDev_0sel()), filter_0, "0");
 		}
 	}));
 	
@@ -107,7 +110,8 @@ public class SwitchMain {
 		
 		PacketHandler ph_1 = new PacketHandler();
 		public void run() {
-				ph_1.getPacket(alldevs_tmp.get(Gui.getDev_1sel()), filter_1, "1");
+			//System.out.println(alldevs_tmp.get(Gui.getDev_1sel()));
+			ph_1.getPacket(alldevs_tmp.get(Gui.getDev_1sel()), filter_1, "1");
 		}
 	}));
 
